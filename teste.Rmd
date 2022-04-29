@@ -1,0 +1,183 @@
+---
+title: "teste"
+author: "Thais Pereira"
+date: "29/04/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# baixando os dados
+
+# pacotes 
+
+```{r}
+
+library("tidyverse")
+library("ggplot2")
+library("readxl")
+library("googlesheets4")
+
+
+```
+
+# baixando os dados separadamente
+
+```{r}
+
+influenza <- read_excel("prova_analistaJR.xls", "Influenza")
+resultado_pcr <- read_excel("prova_analistaJR.xls", "Resultado_PCR")
+vacina <- read_excel("prova_analistaJR.xls", "Vacina")
+tosse <- read_excel("prova_analistaJR.xls", "Tosse")
+febre <- read_excel("prova_analistaJR.xls", "Febre")
+
+
+```
+
+
+# juntando as bases de dados usando a coluna ID
+
+```{r}
+
+
+base_completa <- influenza %>% 
+  left_join(tosse, by = "ID") %>% 
+  left_join(vacina, by = "ID") %>% 
+  left_join(resultado_pcr, by = "ID") %>% 
+  left_join(febre, by = "ID") 
+  
+
+```
+
+
+# Pergunta - 3: A diretoria gostaria de saber informações sobre:
+
+qual a característica dos pacientes que possuem PCR positivo? 
+Qual a distribuiçãao geográfica dos mesmos? 
+Há fatores de risco nesse grupo de pacientes com PCR positivo? 
+
+
+```{r}
+
+# qual a característica dos pacientes que possuem PCR positivo? 
+
+# Qual o sexo dos pacientes PCR Positivo?
+
+base_completa %>% filter(PCR_RESUL == "POSITIVO") %>% 
+  group_by(SFebrEXO) %>% 
+  tally() %>% 
+  mutate(proporcao = n/sum(n)) %>% 
+  mutate(percentual = paste0(round(proporcao * 100, 1),"%")) %>% 
+  select(SEXO, percentual)
+  
+
+
+```
+
+
+```{r}
+
+# Quantos % tiveram tosse?
+
+base_completa %>% filter(PCR_RESUL == "POSITIVO") %>% 
+  group_by(TOSSE) %>% 
+  tally() %>% 
+  mutate(proporcao = n/sum(n)) %>% 
+  mutate(percentual = paste0(round(proporcao * 100, 1),"%")) %>% 
+  select(TOSSE, percentual)
+
+
+```
+
+
+```{r}
+
+# Quantos % tomaram vacina?
+
+
+base_completa %>% filter(PCR_RESUL == "POSITIVO") %>% 
+  group_by(VACINA) %>% 
+  tally() %>% 
+  mutate(proporcao = n/sum(n)) %>% 
+  mutate(percentual = paste0(round(proporcao * 100, 1),"%")) %>% 
+  select(VACINA, percentual)
+
+
+```
+
+
+```{r}
+
+# Quantos % tiveram febre?
+
+base_completa %>% filter(PCR_RESUL == "POSITIVO") %>% 
+  group_by(FEBRE) %>% 
+  tally() %>% 
+  mutate(proporcao = n/sum(n)) %>% 
+  mutate(percentual = paste0(round(proporcao * 100, 1),"%")) %>% 
+  select(FEBRE, percentual)
+
+
+```
+
+
+```{r}
+
+# Qual a distribuiçãao geográfica dos mesmos? 
+
+base_completa %>% filter(PCR_RESUL == "POSITIVO") %>% 
+  group_by(SG_UF_NOT) %>% 
+  tally() %>% 
+  mutate(pct = n/sum(n)) %>% 
+  ggplot() +
+  geom_col(aes(x = reorder(SG_UF_NOT, n), y = n), fill = "palevioletred") + 
+   xlab("") +
+  ylab("") +
+  theme_light()+
+  theme(plot.title = element_text(family = "serif", size = 18, face = "bold", hjust = 0.5, colour = "black"),
+        text = element_text(family = "serif"),
+        axis.text = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 10, face = "bold"),
+        legend.title = element_text(size = 10, face = "bold"))+
+   coord_flip() 
+
+  
+  
+
+```
+
+
+```{r}
+
+# Em quantos % há fatores de risco?
+
+
+base_completa %>% filter(PCR_RESUL == "POSITIVO") %>% 
+  group_by(FATOR_RISCO) %>% 
+  tally() %>% 
+  mutate(proporcao = n/sum(n)) %>% 
+  mutate(percentual = paste0(round(proporcao * 100, 1),"%")) %>% 
+  select(FATOR_RISCO, percentual)
+
+```
+
+
+# Mais três gráficos: Sugestões de análise 
+
+```{r}
+
+
+base_completa %>%  View()
+
+```
+
+
+
+
+
+
+
+
+
